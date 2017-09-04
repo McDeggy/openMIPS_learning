@@ -1,0 +1,267 @@
+m255
+K3
+13
+cModel Technology
+Z0 dC:\modeltech64_10.1c\examples
+T_opt
+V4V<aNQE;dZf[ZGC=Ggg2^3
+Z1 04 20 4 work openmips_min_sopc_tb fast 0
+=1-309c232f5324-59ace84a-279-2410
+o-quiet -auto_acc_if_foreign -work work
+n@_opt
+Z2 OL;O;10.1c;51
+Z3 dC:\modeltech64_10.1c\examples
+T_opt1
+Vi:=8UZ@N@^]QP3bDf]Y8X1
+R1
+=1-309c232f5324-59acedce-2ad-27fc
+o-quiet -auto_acc_if_foreign -work work +acc
+n@_opt1
+R2
+vex
+IJMmA`XLZ@QIXBL^_h`8CY2
+V:m5ZU=^c16=mHMk8<0d>i1
+Z4 dD:\GitHub\openMIPS_learning\openMIPS_learning\sim
+w1504497649
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v
+L0 11
+Z5 OL;L;10.1c;51
+r1
+31
+Z6 o-work work -L mtiAvm -L mtiOvm -L mtiUvm -L mtiUPF
+Z7 !s92 -work work +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src -L mtiAvm -L mtiOvm -L mtiUvm -L mtiUPF
+!s100 @UfH<0TfBO`<>;d=Wh8Qj1
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v|
+!s108 1504505283.324000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v|
+!i10b 1
+!s85 0
+vex_mem
+Ie;<[FU=@UIUf9C70OQfm]1
+Va78E9ii?T7KPzHbo7KNVa2
+R4
+w1504491175
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex_mem.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/ex_mem.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 Sm?]D<FcXb>O3b_MIgznA2
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex_mem.v|
+!s108 1504505283.684000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex_mem.v|
+!i10b 1
+!s85 0
+vid
+I0U_GNCTW1e98b[Mb_:V8S0
+VnS;8ZLzNQeDkQ9JPQNO3K3
+R4
+w1504251059
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 fn><fWNF7BnPDk?9F@a[a0
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v|
+!s108 1504505284.024000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v|
+!i10b 1
+!s85 0
+vid_ex
+IMRd2U^[6F4C3CS^bJ2DzO1
+V?TQL7]PR8M7:R]6G@2Jeb1
+R4
+w1504252130
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/id_ex.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/id_ex.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 Tm7Y<]4YhI?e;0IbdniE70
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/id_ex.v|
+!s108 1504505284.413000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/id_ex.v|
+!i10b 1
+!s85 0
+vif_id
+IMB>@`DziI>fEk[jmkB1mG1
+V?WLjRa_B7]<n3H?;Wj]4V1
+R4
+w1504251268
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 PKUG76UGnQZW2?U2de=Fa3
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v|
+!s108 1504505284.722000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v|
+!i10b 1
+!s85 0
+vinst_rom
+IX1?8^[;iHW?BATmM<X`EC0
+Vdd?kfMiSGOL?c[K6=;BCO2
+R4
+w1504505219
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/inst_rom.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/inst_rom.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 UKBPBD:VlZiaLH4Y[Cf[82
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/inst_rom.v|
+!s108 1504505285.038000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/inst_rom.v|
+!i10b 1
+!s85 0
+vmem
+Ii[ZX;glhM<9RN]lbG4ER02
+V89BhUD:YfAz?:_0_@lB3c0
+R4
+w1504491785
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/mem.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 E_QD_JLR1J_[Uo_^05lh@3
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem.v|
+!s108 1504505285.268000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem.v|
+!i10b 1
+!s85 0
+vmem_wb
+Ikg]_jPUQZ?mi^hjafLaC`0
+V<C?V::c_6NfaVfUeljK9R2
+R4
+w1504492146
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem_wb.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/mem_wb.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 <EmL6>@<=>Sh=Z8G;Fgzi0
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem_wb.v|
+!s108 1504505285.582000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem_wb.v|
+!i10b 1
+!s85 0
+vopenmips
+ICNHeaPM8EYH>_hK2zoz[`1
+VT9XabPN5[I[b^GDXFof[=1
+R4
+w1504503197
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 EW`2b2fHX5o7HmkX@>LCX1
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v|
+!s108 1504505285.866000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v|
+!i10b 1
+!s85 0
+vopenmips_min_sopc
+IRe4;=9UQEccV2^C^W34`c1
+V>oQnH]7^FROW0cG3a6B;63
+R4
+w1504503002
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips_min_sopc.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips_min_sopc.v
+L0 5
+R5
+r1
+31
+R6
+R7
+!s100 X1Z4e;HIfLmedO`YAJMU21
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips_min_sopc.v|
+!s108 1504505286.392000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips_min_sopc.v|
+!i10b 1
+!s85 0
+vopenmips_min_sopc_tb
+Ii>j4KgFK^8N?nK<MWEXBG0
+VjAlLFJz2iV<GeaoLO:T?d1
+R4
+w1393082256
+8D:/GitHub/openMIPS_learning/openMIPS_learning/sim/openmips_min_sopc_tb.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/sim/openmips_min_sopc_tb.v
+L0 36
+R5
+r1
+31
+R6
+R7
+!s100 ef@:ZTY>>f;bY8Ue?`ZGO0
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/sim/openmips_min_sopc_tb.v|
+!i10b 1
+!s85 0
+!s108 1504505287.337000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/sim/openmips_min_sopc_tb.v|
+vpc_reg
+IX;f7iW=a=2mWZRVi2:Mf_0
+VK]mB7jecnjLzMW^lB7hDS0
+R4
+w1504165132
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/pc_reg.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/pc_reg.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 I9YTzM6UnXeg03^LSPTZN0
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/pc_reg.v|
+!s108 1504505286.697000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/pc_reg.v|
+!i10b 1
+!s85 0
+vregfile
+IjeWXi?lj^Umf27J_mZz3j3
+VCc88GW:H2:IP]GcGWTbBo0
+R4
+w1504492289
+8D:/GitHub/openMIPS_learning/openMIPS_learning/src/regfile.v
+FD:/GitHub/openMIPS_learning/openMIPS_learning/src/regfile.v
+L0 11
+R5
+r1
+31
+R6
+R7
+!s100 eb]dMMPWMWej6[`dEShP12
+!s90 -reportprogress|300|-work|work|-vopt|+incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src|D:/GitHub/openMIPS_learning/openMIPS_learning/src/regfile.v|
+!s108 1504505287.012000
+!s107 D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v|D:/GitHub/openMIPS_learning/openMIPS_learning/src/regfile.v|
+!i10b 1
+!s85 0
