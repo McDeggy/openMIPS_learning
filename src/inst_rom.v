@@ -18,7 +18,7 @@ module inst_rom(
 	reg[`InstBus]				inst_mem[`InstMemNum-1 : 0];
 
 	//initial ROM for testbench
-	initial $readmemh ("inst_rom.data", inst_mem);
+	initial $readmemh ("test.data", inst_mem);
 
 	always @ (*)
 	begin

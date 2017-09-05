@@ -15,6 +15,12 @@ entity id is
         reg1_o          : out    vl_logic_vector(31 downto 0);
         reg2_o          : out    vl_logic_vector(31 downto 0);
         wd_o            : out    vl_logic_vector(4 downto 0);
-        wreg_o          : out    vl_logic
+        wreg_o          : out    vl_logic;
+        ex_wd_i         : in     vl_logic_vector(4 downto 0);
+        ex_wreg_i       : in     vl_logic;
+        ex_wdata_i      : in     vl_logic_vector(31 downto 0);
+        mem_wd_i        : in     vl_logic_vector(4 downto 0);
+        mem_wreg_i      : in     vl_logic;
+        mem_wdata_i     : in     vl_logic_vector(31 downto 0)
     );
 end id;

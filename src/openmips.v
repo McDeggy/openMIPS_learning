@@ -111,7 +111,17 @@ module openmips(
 		.reg1_o(id_reg1_o),					//o
 		.reg2_o(id_reg2_o),					//o
 		.wd_o(id_wd_o),						//o
-		.wreg_o(id_wreg_o)					//o
+		.wreg_o(id_wreg_o),					//o
+
+		//data backward from EX module for correlation
+		.ex_wd_i(ex_wd_o),					//i
+		.ex_wreg_i(ex_wreg_o),				//i
+		.ex_wdata_i(ex_wdata_o),			//i
+
+		//data backward from MEM module for correlation
+		.mem_wd_i(mem_wd_o),				//i
+		.mem_wreg_i(mem_wreg_o),			//i
+		.mem_wdata_i(mem_wdata_o)			//i
 	);
 
 	//Regfile module
@@ -169,7 +179,7 @@ module openmips(
 		.wd_i(ex_wd_i),						//i
 		.wreg_i(ex_wreg_i),					//i
 
-		//to EX/MEM module
+		//to EX/MEM module (back to ID module for data correlation)
 		.wd_o(ex_wd_o),						//o
 		.wreg_o(ex_wreg_o),					//o
 		.wdata_o(ex_wdata_o)				//o
@@ -200,7 +210,7 @@ module openmips(
 		.wreg_i(mem_wreg_i),				//i
 		.wdata_i(mem_wdata_i),				//i
 
-		//to MEM/WB module
+		//to MEM/WB module (back to ID module for data correlation)
 		.wd_o(mem_wd_o),					//o
 		.wreg_o(mem_wreg_o),				//o
 		.wdata_o(mem_wdata_o)				//o

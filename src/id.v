@@ -29,7 +29,20 @@ module id(
 	output reg[`RegBus]			reg1_o,				//opertion code 1 32bit
 	output reg[`RegBus]			reg2_o,				//opertion code 2 32bit
 	output reg[`RegAddrBus]		wd_o,				//destination GPR
-	output reg					wreg_o				//flag of writing destination GPR
+	output reg					wreg_o,				//flag of writing destination GPR
+
+	//input from EXE state (data backward for correlation)
+	input wire[`RegAddrBus]		ex_wd_i,
+	input wire					ex_wreg_i,
+	input wire[`RegBus]			ex_wdata_i,
+
+	//input from MEM state (data backward for correlation)
+	input wire[`RegAddrBus]		mem_wd_i,
+	input wire					mem_wreg_i,
+	input wire[`RegBus]			mem_wdata_i
+
+
+	
 );
 
 	// 3 types of instruction in MIPS32
@@ -64,6 +77,10 @@ module id(
 	//indicate instruction valid or invalid
 
 	reg inst_valid;
+
+	//mux regs for read port 1 and read port 2 (data backward for correlation)
+	reg[`RegBus] reg1_mux_i;
+	reg[`RegBus] reg2_mux_i;
 
 	//decode instruction
 
@@ -127,6 +144,28 @@ module id(
 	
 	end
 
+	//mux the input from instruction/EX module/MEM module for data correlation
+
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			reg1_mux_i = `ZeroWord;
+		end
+		else if ((ex_wreg_i == `WriteEnable)&&(reg1_addr_o == ex_wd_i))						//if port 1 read the same GPR that EX module will write, output the data directly instead of read from GPR
+		begin
+			reg1_mux_i = ex_wdata_i;
+		end
+		else if ((mem_wreg_i == `WriteEnable)&&(reg1_addr_o == mem_wd_i))					//if port 1 read the same GPR that MEM module will write, output the data directly instead of read from GPR
+		begin
+			reg1_mux_i = mem_wdata_i;
+		end
+		else
+		begin
+			reg1_mux_i = reg1_data_i;
+		end
+	end
+
 	//indicate operation code 1 reg1_o
 
 	always @ (*)
@@ -137,7 +176,8 @@ module id(
 		end
 		else if (reg1_read_o == `ReadEnable)
 		begin
-			reg1_o = reg1_data_i;
+//			reg1_o = reg1_data_i;
+			reg1_o = reg1_mux_i;
 		end
 		else if (reg1_read_o == `ReadDisable)
 		begin
@@ -146,6 +186,28 @@ module id(
 		else
 		begin
 			reg1_o = `ZeroWord;
+		end
+	end
+
+	//mux the input from instruction/EX module/MEM module for data correlation
+
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			reg2_mux_i = `ZeroWord;
+		end
+		else if ((ex_wreg_i == `WriteEnable)&&(reg2_addr_o == ex_wd_i))						//if port 2 read the same GPR that EX module will write, output the data directly instead of read from GPR
+		begin
+			reg2_mux_i = ex_wdata_i;
+		end
+		else if ((mem_wreg_i == `WriteEnable)&&(reg2_addr_o == mem_wd_i))					//if port 2 read the same GPR that MEM module will write, output the data directly instead of read from GPR
+		begin
+			reg2_mux_i = mem_wdata_i;
+		end
+		else
+		begin
+			reg2_mux_i = reg2_data_i;
 		end
 	end
 
@@ -159,7 +221,8 @@ module id(
 		end
 		else if (reg2_read_o == `ReadEnable)
 		begin
-			reg2_o = reg2_data_i;
+//			reg2_o = reg2_data_i;
+			reg2_o = reg2_mux_i;
 		end
 		else if (reg2_read_o == `ReadDisable)
 		begin
