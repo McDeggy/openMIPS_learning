@@ -54,7 +54,7 @@ module id(
 	// 
 	// 2.I type
 	//  31  26 25 21 20 16 15               0
-	// |______|_____|_____|__________________|
+	// |______|_____|_____|__________________|
 	// |  op  |  rs |  rt |     immediate    |
 	//
 	// 3.J type
@@ -63,12 +63,20 @@ module id(
 	// |  op  |            address           |
 
 	//decode instruction for instruction code/ function code
-	//[31:26] (op) indicate instruction type
+	//[31:26] (op) and [5:0] (func) indicate instruction type
 	
-	wire[5:0] op1 = inst_i[31:26];
-//	wire[4:0] op2 = inst_i[10:6];
-//	wire[5:0] op3 = inst_i[5:0];
-//	wire[4:0] op4 = inst_i[20:16];
+	//separate instruction into parts
+	//R-I-J
+	wire[5:0] op_code = inst_i[31:26];			//OP code
+	//R-I
+	wire[4:0] rs_code = inst_i[25:21];			//RS code for GPR address
+	wire[4:0] rt_code = inst_i[20:16];			//RT code for GPR address
+	//R
+	wire[4:0] rd_code = inst_i[15:11];			//RD code for GPR address
+	//wire[4:0] sa_code = inst_i[10:6];			//SA code for shift instruction tempory transmit by imm
+	wire[5:0] func_code = inst_i[5:0];			//FUNC code 
+	//I
+	wire[15:0] imm_code = inst_i[15:0];			//immidiate data (16bit)
 
 	//reg for immediate data, scale out immediate from 16bit to 32bit.
 
@@ -102,13 +110,16 @@ module id(
 		else
 		begin
 			//always read GPR from port 1 and port 2
-			reg1_addr_o = inst_i[25:21];
-			reg2_addr_o = inst_i[20:16];
+			reg1_addr_o = rs_code;
+			reg2_addr_o = rt_code;
+			//imm and wd_o always fix in the same bit of instruction
+			imm = {16'h0, imm_code};
 
-			case (op1)
+			case (op_code)
 			
+//I type *************************************************************************
 				//ORI instruction
-				`EXE_ORI:
+				`ID_ORI_OP:
 				begin
 					//ORI write destination GPR
 					wreg_o = `WriteEnable;
@@ -120,13 +131,221 @@ module id(
 					reg1_read_o = `ReadEnable;
 					//ORI do not read data from port 2 of GPR
 					reg2_read_o = `ReadDisable;
-					imm = {16'h0, inst_i[15:0]};
+					//imm = {16'h0, imm_code};
 					//writing destination GPR address
-					wd_o = inst_i[20:16];
+					wd_o = rt_code;
 					inst_valid = `InstValid;				
 				end
+
+				//ANDI insturction
+				`ID_ANDI_OP:
+				begin
+					wreg_o = `WriteEnable;
+					aluop_o = `EXE_AND_OP;
+					alusel_o = `EXE_RES_LOGIC;
+					reg1_read_o = `ReadEnable;
+					reg2_read_o = `ReadDisable;
+					//imm = {16'h0, imm_code};
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
 				
-				//NOP
+				//XORI insturcion
+				`ID_XORI_OP:
+				begin
+					wreg_o = `WriteEnable;
+					aluop_o = `EXE_XOR_OP;
+					alusel_o = `EXE_RES_LOGIC;
+					reg1_read_o = `ReadEnable;
+					reg2_read_o = `ReadDisable;
+					//imm = {16'h0, imm_code};
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
+
+				//LUI insturction
+				`ID_LUI_OP:
+				begin
+					wreg_o = `WriteEnable;
+					aluop_o = `EXE_LUI_OP;
+					alusel_o = `EXE_RES_LOGIC;
+					reg1_read_o = `ReadEnable;					//ReadDisable is ok as well
+					reg2_read_o = `ReadDisable;
+					//imm = {16'h0, imm_code};
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
+
+				//PREF insturction temporily the same with NOP or NULL, does nothing
+				`ID_PREF_OP:
+				begin
+					wreg_o = `WriteDisable;
+					aluop_o = `EXE_NOP_OP;
+					alusel_o = `EXE_RES_NOP;
+					reg1_read_o = `ReadDisable;
+					reg2_read_o = `ReadDisable;
+					//imm = {16'h0, imm_code};
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
+				
+//R type *************************************************************************			
+				`ID_SPECIAL_OP:
+				begin
+					case (func_code)
+						//AND instruction
+						`ID_AND_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_AND_OP;
+							alusel_o = `EXE_RES_LOGIC;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//OR instruction
+						`ID_OR_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_OR_OP;
+							alusel_o = `EXE_RES_LOGIC;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//XOR instruction
+						`ID_XOR_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_XOR_OP;
+							alusel_o = `EXE_RES_LOGIC;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//NOR instruction
+						`ID_NOR_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_NOR_OP;
+							alusel_o = `EXE_RES_LOGIC;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SLLV instruction
+						`ID_SLLV_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SLLV_OP;
+							alusel_o = `EXE_RES_SHIFT;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SRLV instruction
+						`ID_SRLV_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SRLV_OP;
+							alusel_o = `EXE_RES_SHIFT;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SRAV instruction
+						`ID_SRAV_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SRAV_OP;
+							alusel_o = `EXE_RES_SHIFT;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SLL SRL SRA are diferent from AND/SLLV/ORI, sa will transmit to EX module by imm
+						//SLL instruction (including NOP and SSNOP)
+						//NOP = SLL $0,$0,0
+						//SSNOP = SLL $0,$0,1
+						`ID_SLL_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SLL_OP;
+							alusel_o = `EXE_RES_SHIFT;
+							// difer from AND/SLLV/ORI ...
+							reg1_read_o = `ReadDisable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SRL instruction
+						`ID_SRL_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SRL_OP;
+							alusel_o = `EXE_RES_SHIFT;
+							// difer from AND/SLLV/ORI ...
+							reg1_read_o = `ReadDisable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SRA instruction
+						`ID_SRA_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SRA_OP;
+							alusel_o = `EXE_RES_SHIFT;
+							// difer from AND/SLLV/ORI ...
+							reg1_read_o = `ReadDisable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SYNC instruction
+						`ID_SYNC_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_NOP_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadDisable;
+							reg2_read_o = `ReadEnable;					//ReadDisable is ok as well
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+						
+						//NULL
+						default:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_NOR_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadDisable;
+							reg2_read_o = `ReadDisable;
+							wd_o = `NOPRegAddr;
+							inst_valid = `InstInvalid;
+						end
+					endcase //func_code
+				end
+				
+				//NULL
 				default:
 				begin
 					wreg_o = `WriteDisable;
@@ -134,14 +353,13 @@ module id(
 					alusel_o = `EXE_RES_NOP;
 					reg1_read_o = `ReadDisable;
 					reg2_read_o = `ReadDisable;
-					imm = `ZeroWord;
-					wd_o = inst_i[15:11];
+					//imm = `ZeroWord;
+					wd_o = `NOPRegAddr;
 					inst_valid = `InstInvalid;
 				end
-			endcase
+			endcase //op_code
 		end
 
-	
 	end
 
 	//mux the input from instruction/EX module/MEM module for data correlation
