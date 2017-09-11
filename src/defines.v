@@ -63,6 +63,12 @@
 
 `define ID_SYNC_FUNC  		6'b001111		//SYNC
 
+`define ID_MOVZ_FUNC		6'b001010		//MOVZ
+`define ID_MOVN_FUNC		6'b001011		//MOVN
+`define ID_MFHI_FUNC		6'b010000		//MFHI
+`define ID_MTHI_FUNC		6'b010001		//MTHI
+`define ID_MFLO_FUNC		6'b010010		//MFLO
+`define ID_MTLO_FUNC		6'b010011		//MTLO
 
 //AluOp for EX module (ALU)
 `define EXE_AND_OP			8'b00100100
@@ -81,12 +87,22 @@
 `define EXE_SRA_OP			8'b00000011
 `define EXE_SRAV_OP			8'b00000111
 
+`define EXE_MOV_OP			8'b00001010		//MOVZ and MOVN fetch the same in EX module
+`define EXE_MOVZ_OP			8'b00001010
+`define EXE_MOVN_OP			8'b00001011
+
+`define EXE_MFHI_OP			8'b00010000
+`define EXE_MTHI_OP			8'b00010001
+`define EXE_MFLO_OP			8'b00010010
+`define EXE_MTLO_OP			8'b00010011
+
 `define EXE_NOP_OP			8'b00000000
 
 
 //AluSel for EX module (ALU)
 `define EXE_RES_LOGIC		3'b001
 `define EXE_RES_SHIFT		3'b010
+`define EXE_RES_MOVE		3'b011
 
 `define EXE_RES_NOP			3'b000
 

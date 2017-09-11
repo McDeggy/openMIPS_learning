@@ -18,17 +18,40 @@ module ex(
 	input wire[`RegBus]			reg2_i,
 	input wire[`RegAddrBus]		wd_i,
 	input wire					wreg_i,
+	//HILO reg
+	//from HILO reg module
+	input wire[`RegBus]			hi_i,
+	input wire[`RegBus]			lo_i,
+	//from MEM module
+	input wire					mem_whilo_i,
+	input wire[`RegBus]			mem_hi_i,
+	input wire[`RegBus]			mem_lo_i,
+	//from MEM/WB module
+	input wire					wb_whilo_i,
+	input wire[`RegBus]			wb_hi_i,
+	input wire[`RegBus]			wb_lo_i,
+	
 
 	//execute instruction result
+	//GPR
 	output reg[`RegAddrBus]		wd_o,
 	output reg					wreg_o,
-	output reg[`RegBus]			wdata_o
+	output reg[`RegBus]			wdata_o,
+	//HILO reg
+	output reg					whilo_o,
+	output reg[`RegBus]			hi_o,
+	output reg[`RegBus]			lo_o
 );
 
 	//register logical operation output
 	
 	reg[`RegBus]				logicout;
 	reg[`RegBus]				shiftres;
+	reg[`RegBus]				moveres;
+
+	//mux for HILO reg
+	reg[`RegBus]				hi_mux_i;
+	reg[`RegBus]				lo_mux_i;
 
 	//execute operation according to aluop_i
 
@@ -83,6 +106,7 @@ module ex(
 	end
 
 	//shift operation
+	
 	always @ (*)
 	begin
 		if (rst == `RstEnable)
@@ -137,6 +161,73 @@ module ex(
 		end
 	end
 
+	//mux HILO reg for data correlation
+	
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			hi_mux_i = `ZeroWord;
+			lo_mux_i = `ZeroWord;
+		end
+		else
+		begin
+			if (mem_whilo_i == `WriteEnable)
+			begin
+				hi_mux_i = mem_hi_i;
+				lo_mux_i = mem_lo_i;
+			end
+			else if (wb_whilo_i == `WriteEnable)
+			begin
+				hi_mux_i = wb_hi_i;
+				lo_mux_i = wb_lo_i;
+			end
+			else
+			begin
+				hi_mux_i = hi_i;
+				lo_mux_i = lo_i;
+			end
+		end
+	end
+
+	//move operation
+
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			moveres = `ZeroWord;
+		end
+		else
+		begin
+			case (aluop_i)
+				//MOVN MONZ
+				`EXE_MOV_OP:
+				begin
+					moveres = reg1_i;
+				end
+
+				//MFHI
+				`EXE_MFHI_OP:
+				begin
+					moveres = hi_mux_i;
+				end
+
+				//MFLO
+				`EXE_MFLO_OP:
+				begin
+					moveres = lo_mux_i;
+				end
+
+				//NULL
+				default:
+				begin
+					moveres = `ZeroWord;
+				end
+			endcase //aluop_i
+		end
+	end
+
 	//write execute result back to GPR or not according to alusel_i
 
 	always @ (*)
@@ -157,6 +248,12 @@ module ex(
 				wdata_o = shiftres;
 			end
 
+			//MOVN MOVZ
+			`EXE_RES_MOVE:
+			begin
+				wdata_o = moveres;
+			end
+
 			// the same as default
 			`EXE_RES_NOP:
 			begin
@@ -170,6 +267,47 @@ module ex(
 			end
 		endcase //alusel_i
 	end
+
+	//HILO reg operation
+
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			whilo_o = `WriteDisable;
+			hi_o = `ZeroWord;
+			lo_o = `ZeroWord;
+		end
+		else
+		begin
+			case (aluop_i)
+				//MTHI
+				`EXE_MTHI_OP:
+				begin
+					whilo_o = `WriteEnable;
+					hi_o = reg1_i;
+					lo_o = lo_mux_i;
+				end
+
+				//MTLO
+				`EXE_MTLO_OP:
+				begin
+					whilo_o = `WriteEnable;
+					hi_o = hi_mux_i;
+					lo_o = reg1_i;
+				end
+
+				//NULL
+				default:
+				begin
+					whilo_o = `WriteDisable;
+					hi_o = `ZeroWord;
+					lo_o = `ZeroWord;
+				end
+			endcase //aluop_i
+		end
+	end
+
 
 endmodule
 

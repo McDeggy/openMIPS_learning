@@ -330,6 +330,94 @@ module id(
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
+
+						//MOVN instruction
+						`ID_MOVN_FUNC:
+						begin
+							//GPR[rt] != 32'h0, GPR[rd] = GPR[rs]
+							if (reg2_o == `ZeroWord)
+							begin
+								wreg_o = `WriteDisable;
+							end
+							else
+							begin
+								wreg_o = `WriteEnable;
+							end
+							aluop_o = `EXE_MOV_OP;
+							alusel_o = `EXE_RES_MOVE;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MOVZ instruction
+						`ID_MOVZ_FUNC:
+						begin
+							//GPR[rt] == 32'h0, GPR[rd] = GPR[rs]
+							if (reg2_o == `ZeroWord)
+							begin
+								wreg_o = `WriteEnable;
+							end
+							else
+							begin
+								wreg_o = `WriteDisable;
+							end
+							aluop_o = `EXE_MOV_OP;
+							alusel_o = `EXE_RES_MOVE;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MFHI instruction
+						`ID_MFHI_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_MFHI_OP;
+							alusel_o = `EXE_RES_MOVE;
+							reg1_read_o = `ReadDisable;
+							reg2_read_o = `ReadDisable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MFLO instruction
+						`ID_MFLO_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_MFLO_OP;
+							alusel_o = `EXE_RES_MOVE;
+							reg1_read_o = `ReadDisable;
+							reg2_read_o = `ReadDisable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MTHI instruction
+						`ID_MTHI_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MTHI_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadDisable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MTLO instruction
+						`ID_MTLO_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MTLO_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadDisable;
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
 						
 						//NULL
 						default:

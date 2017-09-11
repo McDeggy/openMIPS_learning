@@ -1,16 +1,16 @@
-D:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v
-Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
--- Compiling module id
-
-Top level modules:
-	id
-
-} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v
+D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 -- Compiling module ex
 
 Top level modules:
 	ex
+
+} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/id.v
+Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
+-- Compiling module id
+
+Top level modules:
+	id
 
 } {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/defines.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
@@ -35,6 +35,13 @@ Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 
 Top level modules:
 	openmips_min_sopc_tb
+
+} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/hilo_reg.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/hilo_reg.v
+Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
+-- Compiling module hilo_reg
+
+Top level modules:
+	hilo_reg
 
 } {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/inst_rom.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/inst_rom.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
@@ -71,12 +78,12 @@ Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 Top level modules:
 	openmips_min_sopc
 
-} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v
+} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
--- Compiling module if_id
+-- Compiling module openmips
 
 Top level modules:
-	if_id
+	openmips
 
 } {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex_mem.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/ex_mem.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
@@ -85,11 +92,11 @@ Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 Top level modules:
 	ex_mem
 
-} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v
+} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
--- Compiling module openmips
+-- Compiling module if_id
 
 Top level modules:
-	openmips
+	if_id
 
 } {} {}}
