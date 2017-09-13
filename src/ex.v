@@ -43,7 +43,7 @@ module ex(
 	output reg[`RegBus]			lo_o
 );
 
-	//register logical operation output
+	//register logical/shift/move operation output
 	
 	reg[`RegBus]				logicout;
 	reg[`RegBus]				shiftres;
@@ -52,6 +52,20 @@ module ex(
 	//mux for HILO reg
 	reg[`RegBus]				hi_mux_i;
 	reg[`RegBus]				lo_mux_i;
+
+	//regs and wires for math
+	reg[`RegBus]				mathres;
+	
+	wire[`RegBus]				reg2_mux_i;					//complement for reg2_i
+	wire[`RegBus]				reg1_add_reg2;
+	wire						overflow_add;				//overflow flag for ADD/SUB instruction
+	wire						reg1_lt_reg2;				//compare flag for SLT/SLTU/SLTI/SLTIU
+	wire[`RegBus]				reg1_mux_i;					//for zero count
+	wire[5:0]					zero_counter;				//CLZ CLO
+	wire[`RegBus]				reg1_mul_i;					//MUL MULT MULTU
+	wire[`RegBus]				reg2_mul_i;					//MUL MULT MULTU
+	wire[`DoubleRegBus]			reg1_mul_reg2;				//MUL MULT MULTU
+	wire[`DoubleRegBus]			mulres;						//MUL MULT MULTU
 
 	//execute operation according to aluop_i
 
@@ -228,12 +242,137 @@ module ex(
 		end
 	end
 
+	//ADD ADDI ADDU ADDIU SUB SUBU SLT SLTI
+	//pretreatment for math a-b = a+(-b) = a+(~b+1)
+	assign reg2_mux_i = ((aluop_i == `EXE_SUB_OP) ||
+						(aluop_i == `EXE_SUBU_OP) ||
+						(aluop_i == `EXE_SLT_OP)) ?
+						(~reg2_i)+1 : reg2_i;
+	assign reg1_add_reg2 = reg1_i + reg2_mux_i;
+	//if reg1/reg2 are postive, and result is negative, there is overflow
+	//if reg1/reg2 are negative, and result is postive, there is overflow
+	assign overflow_add = ((!reg1_i[31] && !reg2_mux_i[31]) && reg1_add_reg2[31]) ||
+							((reg1_i[31] && reg2_mux_i[31]) && (!reg1_add_reg2[31]));
+
+	//SLT SLTI SLTU SLTIU
+	//signed compare between reg1 and reg2
+	//if reg1 is negative and reg2 is positive, reg1<reg2
+	//if reg1 is positive and reg2 is positive, reg1-reg2<0 then reg1<reg2
+	//if reg1 is negative and reg2 is negative, reg1-reg2<0 then reg1<reg2
+	assign reg1_lt_reg2 = (aluop_i == `EXE_SLT_OP) ?
+							(reg1_i[31] && !reg2_i[31]) ||
+							(reg1_i[31] && reg2_i[31] && reg1_add_reg2[31]) ||
+							(!reg1_i[31] && !reg2_i[31] && reg1_add_reg2[31]) :
+							(reg1_i < reg2_i);
+
+	//CLZ CLO
+	assign reg1_mux_i = (aluop_i == `EXE_CLO_OP) ? ~reg1_i : reg1_i;
+	assign zero_counter = reg1_mux_i[31] ? 0 :
+							reg1_mux_i[30] ? 1 :
+							reg1_mux_i[29] ? 2 :
+							reg1_mux_i[28] ? 3 :
+							reg1_mux_i[27] ? 4 :
+							reg1_mux_i[26] ? 5 :
+							reg1_mux_i[25] ? 6 :
+							reg1_mux_i[24] ? 7 :
+							reg1_mux_i[23] ? 8 :
+							reg1_mux_i[22] ? 9 :
+							reg1_mux_i[21] ? 10 :
+							reg1_mux_i[20] ? 11 :
+							reg1_mux_i[19] ? 12 :
+							reg1_mux_i[18] ? 13 :
+							reg1_mux_i[17] ? 14 :
+							reg1_mux_i[16] ? 15 :
+							reg1_mux_i[15] ? 16 :
+							reg1_mux_i[14] ? 17 :
+							reg1_mux_i[13] ? 18 :
+							reg1_mux_i[12] ? 19 :
+							reg1_mux_i[11] ? 20 :
+							reg1_mux_i[10] ? 21 :
+							reg1_mux_i[9] ? 22 :
+							reg1_mux_i[8] ? 23 :
+							reg1_mux_i[7] ? 24 :
+							reg1_mux_i[6] ? 25 :
+							reg1_mux_i[5] ? 26 :
+							reg1_mux_i[4] ? 27 :
+							reg1_mux_i[3] ? 28 :
+							reg1_mux_i[2] ? 29 :
+							reg1_mux_i[1] ? 30 :
+							reg1_mux_i[0] ? 31 : 32;
+
+	//MUL MULT MULTU
+	//1.MUL/MULT is signed operation, convert reg1/reg2 to complement if reg1/reg2 is negative
+	assign reg1_mul_i = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP)) && (reg1_i[31] == 1'b1)) ? (~reg1_i + 1) : reg1_i;
+	assign reg2_mul_i = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP)) && (reg2_i[31] == 1'b1)) ? (~reg2_i + 1) : reg2_i;
+	//2.temporary store reg1*reg2 (output of hardcore multiplying unit)
+	assign reg1_mul_reg2 = reg1_mul_i * reg2_mul_i;
+	//3.if one of reg1/reg2 is negative and the other one is positive, then convert reg1_mul_reg2 to complement
+	assign mulres = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP)) && (reg1_i[31]^reg2_i[31] == `LogiTrue) )? (~reg1_mul_reg2 + 1) : reg1_mul_reg2;
+
+	//math operation
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			mathres = `ZeroWord;
+		end
+		else
+		begin
+			case (aluop_i)
+				//ADD ADDI ADDU ADDIU SUB SUBU
+				`EXE_ADD_OP, `EXE_ADDI_OP, `EXE_ADDU_OP, `EXE_ADDIU_OP, `EXE_SUB_OP, `EXE_SUBU_OP:
+				begin
+					mathres = reg1_add_reg2;
+				end
+
+				//SLT SLTU SLTI SLTIU
+				`EXE_SLT_OP, `EXE_SLTU_OP:
+				begin
+					mathres = {31'b0, reg1_lt_reg2};
+				end
+
+				//CLZ CLO
+				`EXE_CLZ_OP, `EXE_CLO_OP:
+				begin
+					mathres = {26'b0, zero_counter};
+				end
+
+				//MUL
+				`EXE_MUL_OP:
+				begin
+					mathres = mulres[`RegBus];
+				end
+
+				//NULL
+				default:
+				begin
+					mathres = `ZeroWord;
+				end
+			endcase //aluop_i
+		end
+	end
+
+	//if there is instruction ADD ADDI SUB with overflow, do not write GPR
+	
+	always @ (*)
+	begin
+		wd_o = wd_i;		//destiantion GPR address
+		if (((aluop_i == `EXE_ADD_OP) || (aluop_i == `EXE_ADDI_OP) || (aluop_i == `EXE_SUB_OP)) && (overflow_add == `LogiTrue))
+		begin
+			wreg_o = `WriteDisable;
+		end
+		else
+		begin
+			wreg_o = `WriteEnable;
+		end
+	end
+
 	//write execute result back to GPR or not according to alusel_i
 
 	always @ (*)
 	begin
-		wd_o = wd_i;		//destination GPR address
-		wreg_o = wreg_i;
+		//wd_o = wd_i;		//destination GPR address
+		//wreg_o = wreg_i;
 		case (alusel_i)
 
 			//ORI OR ANDI AND XORI XOR NOR LUI
@@ -252,6 +391,12 @@ module ex(
 			`EXE_RES_MOVE:
 			begin
 				wdata_o = moveres;
+			end
+
+			//ADD ADDI ADDU ADDIU SUB SUBU
+			`EXE_RES_MATH:
+			begin
+				wdata_o = mathres;
 			end
 
 			// the same as default
@@ -295,6 +440,13 @@ module ex(
 					whilo_o = `WriteEnable;
 					hi_o = hi_mux_i;
 					lo_o = reg1_i;
+				end
+
+				//MULT MULTU
+				`EXE_MULT_OP, `EXE_MULTU_OP:
+				begin
+					whilo_o = `WriteEnable;
+					{hi_o, lo_o} = mulres;
 				end
 
 				//NULL

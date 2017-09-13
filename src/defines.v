@@ -45,10 +45,18 @@
 `define ID_LUI_OP			6'b001111		//LUI
 
 `define ID_PREF_OP 			6'b110011		//PREF
-`define ID_SPECIAL_OP		6'b000000		//OP code SPECIAL for R type
 //`define EXE_NOP				6'b000000		//NOP
 
+`define ID_SLTI_OP			6'b001010		//SLTI
+`define ID_SLTIU_OP			6'b001011		//SLTU
+`define ID_ADDI_OP			6'b001000		//ADDI
+`define ID_ADDIU_OP			6'b001001		//ADDIU
+
+`define ID_SPECIAL_OP		6'b000000		//OP code SPECIAL for R type
+`define ID_SPECIAL2_OP		6'b011100		//OP code SPECIAL2 for R type
+
 //R type instruction func code (6bit)
+//ID_SPECIAL_OP
 `define ID_AND_FUNC			6'b100100		//AND
 `define ID_OR_FUNC			6'b100101		//OR
 `define ID_XOR_FUNC			6'b100110		//XOR
@@ -70,14 +78,28 @@
 `define ID_MFLO_FUNC		6'b010010		//MFLO
 `define ID_MTLO_FUNC		6'b010011		//MTLO
 
+`define ID_ADD_FUNC			6'b100000		//ADD
+`define ID_ADDU_FUNC		6'b100001		//ADDU
+`define ID_SUB_FUNC			6'b100010		//SUB
+`define ID_SUBU_FUNC		6'b100011		//SUBU
+`define ID_SLT_FUNC			6'b101010		//SLT
+`define ID_SLTU_FUNC		6'b101011		//SLTU
+`define ID_MULT_FUNC		6'b011000		//MULT
+`define ID_MULTU_FUNC		6'b011001		//MULTU
+
+//ID_SPECIAL2_OP
+`define ID_CLZ_FUNC			6'b100000		//CLZ
+`define ID_CLO_FUNC			6'b100001		//CLO
+`define ID_MUL_FUNC			6'b000010		//MUL
+
 //AluOp for EX module (ALU)
 `define EXE_AND_OP			8'b00100100
 `define EXE_OR_OP			8'b00100101
 `define EXE_XOR_OP			8'b00100110
 `define EXE_NOR_OP			8'b00100111
-//`define EXE_ANDI_OP			8'b01011001
-//`define EXE_ORI_OP			8'b01011010
-//`define EXE_XORI_OP			8'b01011011
+`define EXE_ANDI_OP			8'b01011001
+`define EXE_ORI_OP			8'b01011010
+`define EXE_XORI_OP			8'b01011011
 `define EXE_LUI_OP			8'b01011100   
 
 `define EXE_SLL_OP			8'b01111100
@@ -96,16 +118,36 @@
 `define EXE_MFLO_OP			8'b00010010
 `define EXE_MTLO_OP			8'b00010011
 
-`define EXE_NOP_OP			8'b00000000
+`define EXE_SLT_OP			8'b00101010
+`define EXE_SLTU_OP			8'b00101011
+`define EXE_SLTI_OP			8'b01010111
+`define EXE_SLTIU_OP		8'b01011000   
+`define EXE_ADD_OP			8'b00100000
+`define EXE_ADDU_OP			8'b00100001
+`define EXE_SUB_OP			8'b00100010
+`define EXE_SUBU_OP			8'b00100011
+`define EXE_ADDI_OP			8'b01010101
+`define EXE_ADDIU_OP		8'b01010110
+`define EXE_CLZ_OP			8'b10110000
+`define EXE_CLO_OP			8'b10110001
 
+`define EXE_MULT_OP			8'b00011000
+`define EXE_MULTU_OP		8'b00011001
+`define EXE_MUL_OP			8'b10101001
+
+`define EXE_NOP_OP			8'b00000000
 
 //AluSel for EX module (ALU)
 `define EXE_RES_LOGIC		3'b001
 `define EXE_RES_SHIFT		3'b010
 `define EXE_RES_MOVE		3'b011
+`define EXE_RES_MATH		3'b100
 
 `define EXE_RES_NOP			3'b000
 
+//********** Global Defines *******************************************************************************//
+`define LogiTrue			1'b1
+`define LogiFalse			1'b0
 
 //********** ROM MACRO Defines ****************************************************************************//
 `define InstAddrBus			31:0			//max width of ROM address

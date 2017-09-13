@@ -113,7 +113,7 @@ module id(
 			reg1_addr_o = rs_code;
 			reg2_addr_o = rt_code;
 			//imm and wd_o always fix in the same bit of instruction
-			imm = {16'h0, imm_code};
+			//imm = {16'h0, imm_code};
 
 			case (op_code)
 			
@@ -131,7 +131,7 @@ module id(
 					reg1_read_o = `ReadEnable;
 					//ORI do not read data from port 2 of GPR
 					reg2_read_o = `ReadDisable;
-					//imm = {16'h0, imm_code};
+					imm = {16'h0, imm_code};
 					//writing destination GPR address
 					wd_o = rt_code;
 					inst_valid = `InstValid;				
@@ -145,7 +145,7 @@ module id(
 					alusel_o = `EXE_RES_LOGIC;
 					reg1_read_o = `ReadEnable;
 					reg2_read_o = `ReadDisable;
-					//imm = {16'h0, imm_code};
+					imm = {16'h0, imm_code};
 					wd_o = rt_code;
 					inst_valid = `InstValid;
 				end
@@ -158,7 +158,7 @@ module id(
 					alusel_o = `EXE_RES_LOGIC;
 					reg1_read_o = `ReadEnable;
 					reg2_read_o = `ReadDisable;
-					//imm = {16'h0, imm_code};
+					imm = {16'h0, imm_code};
 					wd_o = rt_code;
 					inst_valid = `InstValid;
 				end
@@ -171,7 +171,7 @@ module id(
 					alusel_o = `EXE_RES_LOGIC;
 					reg1_read_o = `ReadEnable;					//ReadDisable is ok as well
 					reg2_read_o = `ReadDisable;
-					//imm = {16'h0, imm_code};
+					imm = {16'h0, imm_code};
 					wd_o = rt_code;
 					inst_valid = `InstValid;
 				end
@@ -184,7 +184,60 @@ module id(
 					alusel_o = `EXE_RES_NOP;
 					reg1_read_o = `ReadDisable;
 					reg2_read_o = `ReadDisable;
-					//imm = {16'h0, imm_code};
+					imm = {16'h0, imm_code};
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
+
+				//ADDI instruction
+				`ID_ADDI_OP:
+				begin
+					wreg_o = `WriteEnable;
+					aluop_o = `EXE_ADDI_OP;
+					alusel_o = `EXE_RES_MATH;
+					reg1_read_o = `ReadEnable;
+					reg2_read_o = `ReadDisable;
+					imm = {{16{imm_code[15]}}, imm_code};		//signed extension
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
+
+				//ADDIU instruction
+				`ID_ADDIU_OP:
+				begin
+					wreg_o = `WriteEnable;
+					aluop_o = `EXE_ADDIU_OP;
+					alusel_o = `EXE_RES_MATH;
+					reg1_read_o = `ReadEnable;
+					reg2_read_o = `ReadDisable;
+					imm = {{16{imm_code[15]}}, imm_code};		//signed extension
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
+
+				//SLTI instruction signed
+				`ID_SLTI_OP:
+				begin
+					wreg_o = `WriteEnable;
+					aluop_o = `EXE_SLT_OP;
+					alusel_o = `EXE_RES_MATH;
+					reg1_read_o = `ReadEnable;
+					reg2_read_o = `ReadDisable;
+					imm = {{16{imm_code[15]}}, imm_code};		//signed extension
+					wd_o = rt_code;
+					inst_valid = `InstValid;
+				end
+
+				//SLTIU instruction unsigned
+				`ID_SLTIU_OP:
+				begin
+					wreg_o = `WriteEnable;
+					aluop_o = `EXE_SLTU_OP;
+					alusel_o = `EXE_RES_MATH;
+					reg1_read_o = `ReadEnable;
+					reg2_read_o = `ReadDisable;
+					//imm = {{16{imm_code[15]}}, imm_code};		//signed extension
+					imm = {16'b0, imm_code};					//zero extension
 					wd_o = rt_code;
 					inst_valid = `InstValid;
 				end
@@ -201,6 +254,7 @@ module id(
 							alusel_o = `EXE_RES_LOGIC;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -213,6 +267,7 @@ module id(
 							alusel_o = `EXE_RES_LOGIC;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -225,6 +280,7 @@ module id(
 							alusel_o = `EXE_RES_LOGIC;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -237,6 +293,7 @@ module id(
 							alusel_o = `EXE_RES_LOGIC;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -249,6 +306,7 @@ module id(
 							alusel_o = `EXE_RES_SHIFT;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -261,6 +319,7 @@ module id(
 							alusel_o = `EXE_RES_SHIFT;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -273,6 +332,7 @@ module id(
 							alusel_o = `EXE_RES_SHIFT;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -289,6 +349,7 @@ module id(
 							// difer from AND/SLLV/ORI ...
 							reg1_read_o = `ReadDisable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -302,6 +363,7 @@ module id(
 							// difer from AND/SLLV/ORI ...
 							reg1_read_o = `ReadDisable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -315,6 +377,7 @@ module id(
 							// difer from AND/SLLV/ORI ...
 							reg1_read_o = `ReadDisable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -327,6 +390,7 @@ module id(
 							alusel_o = `EXE_RES_NOP;
 							reg1_read_o = `ReadDisable;
 							reg2_read_o = `ReadEnable;					//ReadDisable is ok as well
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -347,6 +411,7 @@ module id(
 							alusel_o = `EXE_RES_MOVE;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -367,6 +432,7 @@ module id(
 							alusel_o = `EXE_RES_MOVE;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -379,6 +445,7 @@ module id(
 							alusel_o = `EXE_RES_MOVE;
 							reg1_read_o = `ReadDisable;
 							reg2_read_o = `ReadDisable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -391,6 +458,7 @@ module id(
 							alusel_o = `EXE_RES_MOVE;
 							reg1_read_o = `ReadDisable;
 							reg2_read_o = `ReadDisable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -403,6 +471,7 @@ module id(
 							alusel_o = `EXE_RES_NOP;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadDisable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -415,6 +484,111 @@ module id(
 							alusel_o = `EXE_RES_NOP;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadDisable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//ADD instruction
+						`ID_ADD_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_ADD_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//ADDU instruction
+						`ID_ADDU_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_ADDU_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SUB instruction
+						`ID_SUB_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SUB_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SUBU instruction
+						`ID_SUBU_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SUBU_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SLT instruction signed
+						`ID_SLT_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SLT_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//SLTU instruction unsigned
+						`ID_SLTU_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_SLTU_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MULT instruction
+						`ID_MULT_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MULT_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MULTU instruction
+						`ID_MULTU_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MULTU_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
@@ -427,10 +601,56 @@ module id(
 							alusel_o = `EXE_RES_NOP;
 							reg1_read_o = `ReadDisable;
 							reg2_read_o = `ReadDisable;
+							imm = `ZeroWord;
 							wd_o = `NOPRegAddr;
 							inst_valid = `InstInvalid;
 						end
 					endcase //func_code
+				end
+
+				`ID_SPECIAL2_OP:
+				begin
+					case (func_code)
+						//MUL instruction
+						`ID_MUL_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_MUL_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//CLZ instruction
+						`ID_CLZ_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_CLZ_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//CLO instruction
+						`ID_CLO_FUNC:
+						begin
+							wreg_o = `WriteEnable;
+							aluop_o = `EXE_CLO_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+						
+					endcase
 				end
 				
 				//NULL
@@ -441,7 +661,7 @@ module id(
 					alusel_o = `EXE_RES_NOP;
 					reg1_read_o = `ReadDisable;
 					reg2_read_o = `ReadDisable;
-					//imm = `ZeroWord;
+					imm = `ZeroWord;
 					wd_o = `NOPRegAddr;
 					inst_valid = `InstInvalid;
 				end
