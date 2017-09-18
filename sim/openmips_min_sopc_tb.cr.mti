@@ -50,6 +50,13 @@ Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 Top level modules:
 	inst_rom
 
+} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/ctrl.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/ctrl.v
+Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
+-- Compiling module ctrl
+
+Top level modules:
+	ctrl
+
 } {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem_wb.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/mem_wb.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 -- Compiling module mem_wb
@@ -78,6 +85,13 @@ Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 Top level modules:
 	openmips_min_sopc
 
+} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v
+Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
+-- Compiling module openmips
+
+Top level modules:
+	openmips
+
 } {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/if_id.v
 Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 -- Compiling module if_id
@@ -91,12 +105,5 @@ Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
 
 Top level modules:
 	ex_mem
-
-} {} {}} D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v {1 {vlog -work work -vopt +incdir+D:/GitHub/openMIPS_learning/openMIPS_learning/src D:/GitHub/openMIPS_learning/openMIPS_learning/src/openmips.v
-Model Technology ModelSim SE-64 vlog 10.1c Compiler 2012.07 Jul 27 2012
--- Compiling module openmips
-
-Top level modules:
-	openmips
 
 } {} {}}

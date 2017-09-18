@@ -30,7 +30,10 @@ module ex(
 	input wire					wb_whilo_i,
 	input wire[`RegBus]			wb_hi_i,
 	input wire[`RegBus]			wb_lo_i,
-	
+
+	//wires for MADD MADDU MSUB MSUBU from ex_mem module
+	input wire[1:0]				madd_msub_cnt_i,
+	input wire[`DoubleRegBus]	madd_msub_mul_i,
 
 	//execute instruction result
 	//GPR
@@ -40,11 +43,17 @@ module ex(
 	//HILO reg
 	output reg					whilo_o,
 	output reg[`RegBus]			hi_o,
-	output reg[`RegBus]			lo_o
+	output reg[`RegBus]			lo_o,
+
+	//output signal to pause pipeline
+	output reg					stallreq_from_ex,
+
+	//regs for MADD MADDU MSUB MSUBU
+	output reg[1:0]				madd_msub_cnt_o,
+	output reg[`DoubleRegBus]	madd_msub_mul_o
 );
 
 	//register logical/shift/move operation output
-	
 	reg[`RegBus]				logicout;
 	reg[`RegBus]				shiftres;
 	reg[`RegBus]				moveres;
@@ -66,6 +75,10 @@ module ex(
 	wire[`RegBus]				reg2_mul_i;					//MUL MULT MULTU
 	wire[`DoubleRegBus]			reg1_mul_reg2;				//MUL MULT MULTU
 	wire[`DoubleRegBus]			mulres;						//MUL MULT MULTU
+
+	//regs for MADD MADDU MSUB MSUBU
+	reg						madd_msub_stallreq;			//pause pipeline request
+	reg[`DoubleRegBus]		madd_msub_res;				//contain result of madd_msub_mul_i add hilo reg
 
 	//execute operation according to aluop_i
 
@@ -300,14 +313,29 @@ module ex(
 							reg1_mux_i[1] ? 30 :
 							reg1_mux_i[0] ? 31 : 32;
 
-	//MUL MULT MULTU
-	//1.MUL/MULT is signed operation, convert reg1/reg2 to complement if reg1/reg2 is negative
-	assign reg1_mul_i = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP)) && (reg1_i[31] == 1'b1)) ? (~reg1_i + 1) : reg1_i;
-	assign reg2_mul_i = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP)) && (reg2_i[31] == 1'b1)) ? (~reg2_i + 1) : reg2_i;
+	//MUL MULT MADD MSUB
+	//1.MUL/MULT/MADD/MSUB is signed operation, convert reg1/reg2 to complement if reg1/reg2 is negative
+	assign reg1_mul_i = (((aluop_i == `EXE_MUL_OP) ||
+							(aluop_i == `EXE_MULT_OP) ||
+							(aluop_i == `EXE_MADD_OP) ||
+							(aluop_i == `EXE_MSUB_OP)) &&
+							(reg1_i[31] == 1'b1)) ?
+							(~reg1_i + 1) : reg1_i;
+	assign reg2_mul_i = (((aluop_i == `EXE_MUL_OP) ||
+							(aluop_i == `EXE_MULT_OP) ||
+							(aluop_i == `EXE_MADD_OP) ||
+							(aluop_i == `EXE_MSUB_OP)) &&
+							(reg2_i[31] == 1'b1)) ?
+							(~reg2_i + 1) : reg2_i;
 	//2.temporary store reg1*reg2 (output of hardcore multiplying unit)
 	assign reg1_mul_reg2 = reg1_mul_i * reg2_mul_i;
 	//3.if one of reg1/reg2 is negative and the other one is positive, then convert reg1_mul_reg2 to complement
-	assign mulres = (((aluop_i == `EXE_MUL_OP) || (aluop_i == `EXE_MULT_OP)) && (reg1_i[31]^reg2_i[31] == `LogiTrue) )? (~reg1_mul_reg2 + 1) : reg1_mul_reg2;
+	assign mulres = (((aluop_i == `EXE_MUL_OP) ||
+					(aluop_i == `EXE_MULT_OP) ||
+					(aluop_i == `EXE_MADD_OP) ||
+					(aluop_i == `EXE_MSUB_OP)) &&
+					(reg1_i[31]^reg2_i[31] == `LogiTrue) ) ?
+					(~reg1_mul_reg2 + 1) : reg1_mul_reg2;
 
 	//math operation
 	always @ (*)
@@ -349,6 +377,107 @@ module ex(
 					mathres = `ZeroWord;
 				end
 			endcase //aluop_i
+		end
+	end
+
+	//MADD MADDU MSUB MSUBU
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			madd_msub_cnt_o = 2'b00;
+			madd_msub_stallreq = `LogiFalse;
+			madd_msub_mul_o = {`ZeroWord, `ZeroWord};
+			madd_msub_res = {`ZeroWord, `ZeroWord};
+		end
+		else
+		begin
+			case (aluop_i)
+				//MADD MADDU
+				`EXE_MADD_OP, `EXE_MADDU_OP:
+				begin
+					//first stage, GPR rs*rt and output to EX/MEM module for next stage
+					if (madd_msub_cnt_i == 2'b00)
+					begin
+						madd_msub_cnt_o = 2'b01;
+						//pause the pipeline for add operation of the next stage
+						madd_msub_stallreq = `LogiTrue;
+						madd_msub_mul_o = mulres;
+						madd_msub_res = {`ZeroWord, `ZeroWord};
+					end
+					//second stage, 
+					else if (madd_msub_cnt_i == 2'b01)
+					begin
+						madd_msub_cnt_o = 2'b00;
+						//continue the pipeline
+						madd_msub_stallreq = `LogiFalse;
+						madd_msub_mul_o = {`ZeroWord, `ZeroWord};
+						madd_msub_res = madd_msub_mul_i + {hi_mux_i, lo_mux_i};
+					end
+					//this else will never execute because cnt can be only 2'b00 and 2'b01
+					else
+					begin
+						madd_msub_cnt_o = 2'b00;
+						madd_msub_stallreq = `LogiFalse;
+						madd_msub_mul_o = {`ZeroWord, `ZeroWord};
+						madd_msub_res = {`ZeroWord, `ZeroWord};
+					end
+				end
+
+				//MSUB MSUBU
+				`EXE_MSUB_OP, `EXE_MSUBU_OP:
+				begin
+					//first stage, GPR rs*rt and output to EX/MEM module for next stage
+					if (madd_msub_cnt_i == 2'b00)
+					begin
+						madd_msub_cnt_o = 2'b01;
+						//pause the pipeline for sub operation of the next stage
+						madd_msub_stallreq = `LogiTrue;
+						//a-b = a + (-b), -b=~b+1
+						madd_msub_mul_o = ~mulres + 1;
+						madd_msub_res = {`ZeroWord, `ZeroWord};
+					end
+					//second stage, 
+					else if (madd_msub_cnt_i == 2'b01)
+					begin
+						madd_msub_cnt_o = 2'b00;
+						//continue the pipeline
+						madd_msub_stallreq = `LogiFalse;
+						madd_msub_mul_o = {`ZeroWord, `ZeroWord};
+						madd_msub_res = madd_msub_mul_i + {hi_mux_i, lo_mux_i};
+					end
+					//this else will never execute because cnt can be only 2'b00 and 2'b01
+					else
+					begin
+						madd_msub_cnt_o = 2'b00;
+						madd_msub_stallreq = `LogiFalse;
+						madd_msub_mul_o = {`ZeroWord, `ZeroWord};
+						madd_msub_res = {`ZeroWord, `ZeroWord};
+					end
+				end
+
+				//NULL
+				default:
+				begin
+					madd_msub_cnt_o = 2'b00;
+					madd_msub_stallreq = `LogiFalse;
+					madd_msub_mul_o = {`ZeroWord, `ZeroWord};
+					madd_msub_res = {`ZeroWord, `ZeroWord};
+				end
+			endcase //aluop_i
+		end
+	end
+
+	//pipeline control
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			stallreq_from_ex = `LogiFalse;
+		end
+		else
+		begin
+			stallreq_from_ex = madd_msub_stallreq;
 		end
 	end
 
@@ -447,6 +576,13 @@ module ex(
 				begin
 					whilo_o = `WriteEnable;
 					{hi_o, lo_o} = mulres;
+				end
+
+				//MADD MADDU MSUB MSUBU
+				`EXE_MADD_OP, `EXE_MADDU_OP, `EXE_MSUB_OP, `EXE_MSUBU_OP:
+				begin
+					whilo_o = `WriteEnable;
+					{hi_o, lo_o} = madd_msub_res;
 				end
 
 				//NULL

@@ -30,7 +30,10 @@ module mem_wb(
 	//HILO reg
 	output reg					wb_whilo,
 	output reg[`RegBus]			wb_hi,
-	output reg[`RegBus]			wb_lo
+	output reg[`RegBus]			wb_lo,
+
+	//pause pipeline
+	input wire[5:0]				stall
 
 );
 
@@ -47,7 +50,8 @@ module mem_wb(
 			wb_hi <= `ZeroWord;
 			wb_lo <= `ZeroWord;
 		end
-		else
+		//normal status
+		else if (stall[4] == `LogiFalse)
 		begin
 			//GPR
 			wb_wd <= mem_wd;
@@ -57,6 +61,30 @@ module mem_wb(
 			wb_whilo <= mem_whilo;
 			wb_hi <= mem_hi;
 			wb_lo <= mem_lo;
+		end
+		//if MEM pause while WB don't, then add NOP instruction to WB
+		else if ((stall[4] == `LogiTrue) && (stall[5] == `LogiFalse))
+		begin
+			//GPR
+			wb_wd <= `NOPRegAddr;
+			wb_wreg <= `WriteDisable;
+			wb_wdata <= `ZeroWord;
+			//HILO reg
+			wb_whilo <= `WriteDisable;
+			wb_hi <= `ZeroWord;
+			wb_lo <= `ZeroWord;
+		end
+		//else pause the WB state
+		else
+		begin
+			//GPR
+			wb_wd <= wb_wd;
+			wb_wreg <= wb_wreg;
+			wb_wdata <= wb_wdata;
+			//HILO reg
+			wb_whilo <= wb_whilo;
+			wb_hi <= wb_hi;
+			wb_lo <= wb_lo;
 		end
 	end
 

@@ -12,7 +12,10 @@ module pc_reg(
 	input wire					clk,
 	input wire					rst,
 	output reg[`InstAddrBus]	pc,		//program counter for ROM
-	output reg					ce		//ROM chip enable signal
+	output reg					ce,		//ROM chip enable signal
+	
+	//pause pipeline
+	input wire[5:0]				stall
 );
 
 	always @ (posedge clk)
@@ -33,9 +36,15 @@ module pc_reg(
 		begin
 			pc <= 32'h00000000;			//set pc to 0 when ROM disable		
 		end
-		else
+		//normal status
+		else if (stall[0] == `LogiFalse)
 		begin
 			pc <= pc + 4'h4;			//[1:0] bit of instruction address is nop (32bit)
+		end
+		//do not read anther instruction if pipeline paused
+		else
+		begin
+			pc <= pc;
 		end
 	end
 

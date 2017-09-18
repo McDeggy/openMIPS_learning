@@ -49,6 +49,11 @@ module openmips(
 	wire						ex_whilo_o;
 	wire[`RegBus]				ex_hi_o;
 	wire[`RegBus]				ex_lo_o;
+	//MADD MADDU MSUB MSUBU
+	wire[1:0]					ex_madd_msub_cnt_i;
+	wire[`DoubleRegBus]			ex_madd_msub_mul_i;
+	wire[1:0]					ex_madd_msub_cnt_o;
+	wire[`DoubleRegBus]			ex_madd_msub_mul_o;
 
 	//wires for EX/MEM module and MEM module
 	//GPR
@@ -93,10 +98,33 @@ module openmips(
 	wire[`RegBus]				hi_reg_o;
 	wire[`RegBus]				lo_reg_o;
 
-	//module pc_reg
+	//wires for pause the pipeline
+	wire[5:0]					stall;
+	wire						stallreq_from_id;
+	wire						stallreq_from_ex;
+
+	//module CTRL for pipeline control (pause)
+	ctrl ctrl0(
+		.rst(rst),							//i
+
+		//from ID module
+		.stallreq_from_id(stallreq_from_id),//i
+
+		//from EX module
+		.stallreq_from_ex(stallreq_from_ex),//i
+
+		//to PC_reg/IF_ID/ID_EX/EX_MEM/MEM_WB module
+		.stall(stall)						//o
+	);
+
+	//module PC_reg
 	pc_reg pc_reg0(
 		.clk(clk),							//i
 		.rst(rst),							//i
+		
+		//from CTRL module
+		.stall(stall),						//i
+		
 		.pc(pc),							//o
 		.ce(rom_ce_o)						//o
 	);
@@ -110,6 +138,10 @@ module openmips(
 		.rst(rst),							//i
 		.if_pc(pc),							//i
 		.if_inst(rom_data_i),				//i
+
+		//from ctrl module
+		.stall(stall),						//i
+		
 		.id_pc(id_pc_i),					//o
 		.id_inst(id_inst_i)					//o
 	);
@@ -124,6 +156,9 @@ module openmips(
 		.reg1_data_i(reg1_data),			//i
 		.reg2_data_i(reg2_data),			//i
 
+		//output to ctrl module
+		.stallreq_from_id(stallreq_from_id),//o
+		
 		//output to Regfile module
 		.reg1_read_o(reg1_read),			//o
 		.reg2_read_o(reg2_read),			//o
@@ -183,6 +218,9 @@ module openmips(
 		.id_wd(id_wd_o),					//i
 		.id_wreg(id_wreg_o),				//i
 
+		//from CTRL module
+		.stall(stall),						//i
+
 		//to EX module
 		.ex_aluop(ex_aluop_i),				//o
 		.ex_alusel(ex_alusel_i),			//o
@@ -216,6 +254,12 @@ module openmips(
 		.wb_whilo_i(wb_whilo),				//i
 		.wb_hi_i(wb_hi),					//i
 		.wb_lo_i(wb_lo),					//i
+		//from EX_MEM module (for MADD MADDU MSUB MSUBU)
+		.madd_msub_cnt_i(ex_madd_msub_cnt_i),//i
+		.madd_msub_mul_i(ex_madd_msub_mul_i),//i
+
+		//to CTRL module
+		.stallreq_from_ex(stallreq_from_ex),//o
 
 		//to EX/MEM module (back to ID module for data correlation)
 		//GPR
@@ -225,7 +269,10 @@ module openmips(
 		//HILO reg
 		.whilo_o(ex_whilo_o),				//o
 		.hi_o(ex_hi_o),						//o
-		.lo_o(ex_lo_o)						//o
+		.lo_o(ex_lo_o),						//o
+		//MADD MADDU MSUB MSUBU
+		.madd_msub_cnt_o(ex_madd_msub_cnt_o),//o
+		.madd_msub_mul_o(ex_madd_msub_mul_o)//o
 	);
 
 	//EX/MEM module
@@ -242,6 +289,12 @@ module openmips(
 		.ex_whilo(ex_whilo_o),				//i
 		.ex_hi(ex_hi_o),					//i
 		.ex_lo(ex_lo_o),					//i
+		//MADD MADDU MSUB MSUBU
+		.ex_madd_msub_cnt(ex_madd_msub_cnt_o),//i
+		.ex_madd_msub_mul(ex_madd_msub_mul_o),//i
+
+		//from CTRL module
+		.stall(stall),						//i
 
 		//to MEM module
 		//GPR
@@ -249,9 +302,14 @@ module openmips(
 		.mem_wreg(mem_wreg_i),				//o
 		.mem_wdata(mem_wdata_i),			//o
 		//HILO reg
-		.mem_whilo(mem_whilo_i),
-		.mem_hi(mem_hi_i),
-		.mem_lo(mem_lo_i)
+		.mem_whilo(mem_whilo_i),			//o
+		.mem_hi(mem_hi_i),					//o
+		.mem_lo(mem_lo_i),					//o
+
+		//back to EX module
+		//MADD MADDU MSUB MSUBU
+		.madd_msub_cnt(ex_madd_msub_cnt_i),//o
+		.madd_msub_mul(ex_madd_msub_mul_i)//o
 	);
 
 	//MEM module
@@ -293,6 +351,9 @@ module openmips(
 		.mem_whilo(mem_whilo_o),			//i
 		.mem_hi(mem_hi_o),					//i
 		.mem_lo(mem_lo_o),					//i
+
+		//from CTRL module
+		.stall(stall),						//i
 
 		//to write back state
 		.wb_wd(wb_wd_i),					//o

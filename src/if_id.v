@@ -18,7 +18,10 @@ module if_id(
 
 	//output of ROM, register data and transit to decoder module
 	output reg[`InstAddrBus]	id_pc,
-	output reg[`InstBus]		id_inst
+	output reg[`InstBus]		id_inst,
+
+	//pause pipeline
+	input wire[5:0]				stall
 );
 
 	always @ (posedge clk)
@@ -28,10 +31,23 @@ module if_id(
 			id_pc <= `ZeroWord;
 			id_inst <= `ZeroWord;
 		end
-		else
+		//normal status
+		else if (stall[1] == `LogiFalse)
 		begin
 			id_pc <= if_pc;
 			id_inst <= if_inst;
+		end
+		//if IF pause while ID don't, then add NOP instruction to EX
+		else if ((stall[1] == `LogiTrue) && (stall[2] == `LogiFalse))
+		begin
+			id_pc <= `ZeroWord;
+			id_inst <= `ZeroWord;
+		end
+		//else pause the IF state
+		else
+		begin
+			id_pc <= id_pc;
+			id_inst <= id_inst;
 		end
 	end
 

@@ -39,9 +39,10 @@ module id(
 	//input from MEM state (data backward for correlation)
 	input wire[`RegAddrBus]		mem_wd_i,
 	input wire					mem_wreg_i,
-	input wire[`RegBus]			mem_wdata_i
+	input wire[`RegBus]			mem_wdata_i,
 
-
+	//output signal to pause pipeline
+	output wire					stallreq_from_id
 	
 );
 
@@ -79,16 +80,17 @@ module id(
 	wire[15:0] imm_code = inst_i[15:0];			//immidiate data (16bit)
 
 	//reg for immediate data, scale out immediate from 16bit to 32bit.
-
 	reg[`RegBus] imm;
 	
 	//indicate instruction valid or invalid
-
 	reg inst_valid;
 
 	//mux regs for read port 1 and read port 2 (data backward for correlation)
 	reg[`RegBus] reg1_mux_i;
 	reg[`RegBus] reg2_mux_i;
+
+	//pause pipeline
+	assign stallreq_from_id = `LogiFalse;
 
 	//decode instruction
 
@@ -642,6 +644,58 @@ module id(
 						begin
 							wreg_o = `WriteEnable;
 							aluop_o = `EXE_CLO_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MADD instruction
+						`ID_MADD_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MADD_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MADDU instruction
+						`ID_MADDU_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MADDU_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MSUB instruction
+						`ID_MSUB_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MSUB_OP;
+							alusel_o = `EXE_RES_MATH;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//MSUBU instruction
+						`ID_MSUBU_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_MSUBU_OP;
 							alusel_o = `EXE_RES_MATH;
 							reg1_read_o = `ReadEnable;
 							reg2_read_o = `ReadEnable;
