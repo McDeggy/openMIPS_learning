@@ -87,6 +87,9 @@
 `define ID_MULT_FUNC		6'b011000		//MULT
 `define ID_MULTU_FUNC		6'b011001		//MULTU
 
+`define ID_DIV_FUNC			6'b011010		//DIV
+`define ID_DIVU_FUNC			6'b011011		//DIVU
+
 //ID_SPECIAL2_OP
 `define ID_CLZ_FUNC			6'b100000		//CLZ
 `define ID_CLO_FUNC			6'b100001		//CLO
@@ -144,6 +147,9 @@
 `define EXE_MADDU_OP		8'b10101000
 `define EXE_MSUB_OP			8'b10101010
 `define EXE_MSUBU_OP		8'b10101011
+
+`define EXE_DIV_OP			8'b00011010
+`define EXE_DIVU_OP			8'b00011011
 
 `define EXE_NOP_OP			8'b00000000
 

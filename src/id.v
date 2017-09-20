@@ -594,6 +594,32 @@ module id(
 							wd_o = rd_code;
 							inst_valid = `InstValid;
 						end
+
+						//DIV instruction
+						`ID_DIV_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_DIV_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
+
+						//DIVU instruction
+						`ID_DIVU_FUNC:
+						begin
+							wreg_o = `WriteDisable;
+							aluop_o = `EXE_DIVU_OP;
+							alusel_o = `EXE_RES_NOP;
+							reg1_read_o = `ReadEnable;
+							reg2_read_o = `ReadEnable;
+							imm = {16'b0, imm_code};
+							wd_o = rd_code;
+							inst_valid = `InstValid;
+						end
 						
 						//NULL
 						default:

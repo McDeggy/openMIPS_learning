@@ -54,6 +54,13 @@ module openmips(
 	wire[`DoubleRegBus]			ex_madd_msub_mul_i;
 	wire[1:0]					ex_madd_msub_cnt_o;
 	wire[`DoubleRegBus]			ex_madd_msub_mul_o;
+	//DIV DIVU
+	wire[5:0]					ex_div_shift_cnt_i;
+	wire[`RegBus]				ex_div_quo_i;
+	wire[`RegBus]				ex_div_rem_i;
+	wire[5:0]					ex_div_shift_cnt_o;
+	wire[`RegBus]				ex_div_quo_o;
+	wire[`RegBus]				ex_div_rem_o;
 
 	//wires for EX/MEM module and MEM module
 	//GPR
@@ -257,6 +264,10 @@ module openmips(
 		//from EX_MEM module (for MADD MADDU MSUB MSUBU)
 		.madd_msub_cnt_i(ex_madd_msub_cnt_i),//i
 		.madd_msub_mul_i(ex_madd_msub_mul_i),//i
+		//from EX MEM module (for DIV DIVU)
+		.div_shift_cnt_i(ex_div_shift_cnt_i),//i
+		.div_quo_i(ex_div_quo_i),			//i
+		.div_rem_i(ex_div_rem_i),			//i
 
 		//to CTRL module
 		.stallreq_from_ex(stallreq_from_ex),//o
@@ -272,7 +283,11 @@ module openmips(
 		.lo_o(ex_lo_o),						//o
 		//MADD MADDU MSUB MSUBU
 		.madd_msub_cnt_o(ex_madd_msub_cnt_o),//o
-		.madd_msub_mul_o(ex_madd_msub_mul_o)//o
+		.madd_msub_mul_o(ex_madd_msub_mul_o),//o
+		//DIV DIVU
+		.div_shift_cnt_o(ex_div_shift_cnt_o),//o
+		.div_quo_o(ex_div_quo_o),			//o
+		.div_rem_o(ex_div_rem_o)			//o
 	);
 
 	//EX/MEM module
@@ -292,6 +307,10 @@ module openmips(
 		//MADD MADDU MSUB MSUBU
 		.ex_madd_msub_cnt(ex_madd_msub_cnt_o),//i
 		.ex_madd_msub_mul(ex_madd_msub_mul_o),//i
+		//DIV DIVU
+		.ex_div_shift_cnt_o(ex_div_shift_cnt_o),//i
+		.ex_div_quo_o(ex_div_quo_o),		//i
+		.ex_div_rem_o(ex_div_rem_o),		//i
 
 		//from CTRL module
 		.stall(stall),						//i
@@ -309,7 +328,11 @@ module openmips(
 		//back to EX module
 		//MADD MADDU MSUB MSUBU
 		.madd_msub_cnt(ex_madd_msub_cnt_i),//o
-		.madd_msub_mul(ex_madd_msub_mul_i)//o
+		.madd_msub_mul(ex_madd_msub_mul_i),//o
+		//DIV DIVU
+		.ex_div_shift_cnt_i(ex_div_shift_cnt_i),//o
+		.ex_div_quo_i(ex_div_quo_i),		//o
+		.ex_div_rem_i(ex_div_rem_i)			//o
 	);
 
 	//MEM module

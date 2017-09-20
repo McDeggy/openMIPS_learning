@@ -35,6 +35,14 @@ module ex(
 	input wire[1:0]				madd_msub_cnt_i,
 	input wire[`DoubleRegBus]	madd_msub_mul_i,
 
+	//wires for DIV DIVU
+	//quotient
+	input wire[`RegBus]			div_quo_i,
+	//remainder
+	input wire[`RegBus]			div_rem_i,
+	//count 0 for operation
+	input wire[5:0]					div_shift_cnt_i,
+
 	//execute instruction result
 	//GPR
 	output reg[`RegAddrBus]		wd_o,
@@ -50,7 +58,15 @@ module ex(
 
 	//regs for MADD MADDU MSUB MSUBU
 	output reg[1:0]				madd_msub_cnt_o,
-	output reg[`DoubleRegBus]	madd_msub_mul_o
+	output reg[`DoubleRegBus]	madd_msub_mul_o,
+
+	//regs for DIV DIVU
+	//quotient
+	output reg[`RegBus]			div_quo_o,
+	//remainder
+	output reg[`RegBus]			div_rem_o,
+	//count 0 for operation
+	output reg[5:0]					div_shift_cnt_o
 );
 
 	//register logical/shift/move operation output
@@ -77,8 +93,18 @@ module ex(
 	wire[`DoubleRegBus]			mulres;						//MUL MULT MULTU
 
 	//regs for MADD MADDU MSUB MSUBU
-	reg						madd_msub_stallreq;			//pause pipeline request
-	reg[`DoubleRegBus]		madd_msub_res;				//contain result of madd_msub_mul_i add hilo reg
+	reg						madd_msub_stallreq;				//pause pipeline request
+	reg[`DoubleRegBus]		madd_msub_res;					//contain result of madd_msub_mul_i add hilo reg
+
+	//regs and wires for DIV DIVU
+	reg						div_stallreq;					//pause pipeline request
+	wire[`RegBus]			div_dividend;					//convert from negative complement to true form
+	wire[`RegBus]			div_divisor;					//convert from negative complement to true form
+	wire[`RegBus]			div_quotient;					//convert from negative complement to true form
+	wire[`RegBus]			div_remainder;					//convert from negative complement to true form
+	wire					div_illegal;					//if divisor is 0, then DIV and DIVU is illegal
+	wire[5:0]				div_shift_cnt;					//LUT for shift operation
+	wire[`DoubleRegBus]		divres;							//DIV DIVU
 
 	//execute operation according to aluop_i
 
@@ -468,6 +494,115 @@ module ex(
 		end
 	end
 
+	//DIV DIVU
+	//1.check the divisor is zero?
+	assign div_illegal = (|reg1_i == 1'b0) ? `LogiTrue : `LogiFalse;
+	//2.if reg1_i/reg2_i is complement negative data, transform to true form
+	assign div_dividend = ((aluop_i == `EXE_DIV_OP) && (reg1_i[31] == 1'b1)) ? (~reg1_i + 1) : reg1_i;
+	assign div_divisor = ((aluop_i == `EXE_DIV_OP) && (reg2_i[31] == 1'b1)) ? (~reg2_i + 1) : reg2_i;
+	//3.counter the operating cycle
+	assign div_shift_cnt = div_divisor[31] ? 0 :
+							div_divisor[30] ? 1 :
+							div_divisor[29] ? 2 :
+							div_divisor[28] ? 3 :
+							div_divisor[27] ? 4 :
+							div_divisor[26] ? 5 :
+							div_divisor[25] ? 6 :
+							div_divisor[24] ? 7 :
+							div_divisor[23] ? 8 :
+							div_divisor[22] ? 9 :
+							div_divisor[21] ? 10 :
+							div_divisor[20] ? 11 :
+							div_divisor[19] ? 12 :
+							div_divisor[18] ? 13 :
+							div_divisor[17] ? 14 :
+							div_divisor[16] ? 15 :
+							div_divisor[15] ? 16 :
+							div_divisor[14] ? 17 :
+							div_divisor[13] ? 18 :
+							div_divisor[12] ? 19 :
+							div_divisor[11] ? 20 :
+							div_divisor[10] ? 21 :
+							div_divisor[9] ? 22 :
+							div_divisor[8] ? 23 :
+							div_divisor[7] ? 24 :
+							div_divisor[6] ? 25 :
+							div_divisor[5] ? 26 :
+							div_divisor[4] ? 27 :
+							div_divisor[3] ? 28 :
+							div_divisor[2] ? 29 :
+							div_divisor[1] ? 30 :
+							div_divisor[0] ? 31 : 32;
+	//4.transform DIV result to complement data (if one of dividend/divisor is negative, the quotient will be negative)
+	//when cnt=0, div_quo_i/div_rem_i will refresh on next cycle, so here we use div_quo_o/div_rem_o instead
+	assign div_quotient = ((aluop_i == `EXE_DIV_OP) && (reg1_i[31] ^ reg2_i[31] == 1'b1)) ? {1'b1, (~div_quo_o[30:0] + 1)} : div_quo_o;
+	assign div_remainder = ((aluop_i == `EXE_DIV_OP) && (reg1_i[31] == 1'b1)) ? {1'b1, (~div_rem_o[30:0] + 1)} : div_rem_o;
+	assign divres = (div_shift_cnt_o == 6'b11_1111) ? {div_remainder, div_quotient} : {`ZeroWord, `ZeroWord};
+	
+	always @ (*)
+	begin
+		if (rst == `RstEnable)
+		begin
+			div_stallreq = `LogiFalse;
+			//intial cnt with 11_1111 because actualy cnt may be 0
+			div_shift_cnt_o = 6'b11_1111;
+			div_quo_o = `ZeroWord;
+			div_rem_o = `ZeroWord;
+			//divres = {`ZeroWord, `ZeroWord};
+		end
+		else if ((aluop_i == `EXE_DIV_OP) || (aluop_i == `EXE_DIVU_OP))
+		begin
+			//DIV DIVU cycle begin (initialize regs)
+			if (div_shift_cnt_i == 6'b11_1111)
+			begin
+				//pause pipeline
+				div_stallreq = `LogiTrue;
+				div_shift_cnt_o = div_shift_cnt;
+				div_quo_o = `ZeroWord;
+				div_rem_o = div_dividend;
+				//divres = {`ZeroWord, `ZeroWord};
+			end
+			//DIV DIVU operatin cycle
+			else 
+			begin
+				//cycle control
+				if (div_shift_cnt_i == 6'b00_0000)
+				begin
+					//restart pipeline
+					div_stallreq = `LogiFalse;
+					div_shift_cnt_o = 6'b11_1111;
+				end
+				else
+				begin
+					//pause pipeline
+					div_stallreq = `LogiTrue;
+					//cnt-1 = cnt+(-1) = cnt+(~6'b1)+1 = cnt+6'11_1111
+					div_shift_cnt_o = div_shift_cnt_i + 6'b11_1111;
+				end
+				//core method
+				if (div_rem_i < (div_divisor << div_shift_cnt_i))
+				begin
+					div_quo_o = div_quo_i;
+					div_rem_o = div_rem_i;
+				end
+				else
+				begin
+					div_quo_o = div_quo_i + (1 << div_shift_cnt_i);
+					div_rem_o = div_rem_i + (~(div_divisor << div_shift_cnt_i)) + 1;
+				end
+			end
+		end
+		else
+		begin
+			div_stallreq = `LogiFalse;
+			//default cnt is 11_1111 because actualy cnt may be 0
+			div_shift_cnt_o = 6'b11_1111;
+			div_quo_o = `ZeroWord;
+			div_rem_o = `ZeroWord;
+			//divres = {`ZeroWord, `ZeroWord};
+		end
+	end
+
 	//pipeline control
 	always @ (*)
 	begin
@@ -477,7 +612,7 @@ module ex(
 		end
 		else
 		begin
-			stallreq_from_ex = madd_msub_stallreq;
+			stallreq_from_ex = madd_msub_stallreq | div_stallreq;
 		end
 	end
 
@@ -583,6 +718,13 @@ module ex(
 				begin
 					whilo_o = `WriteEnable;
 					{hi_o, lo_o} = madd_msub_res;
+				end
+
+				//DIV DIVU
+				`EXE_DIV_OP, `EXE_DIVU_OP:
+				begin
+					whilo_o = `WriteEnable;
+					{hi_o, lo_o} = divres;
 				end
 
 				//NULL
